@@ -1,17 +1,17 @@
-# E Commerce API
+# E-Commerce API
 
 ## New Component: Multer for File Uploads
 
 Multer Implementation Plan
 
-1. Install dependencies
+1. Install dependencies:
 npm install express multer path fs
 
-2. Create directory structure
-uploads/: Store uploaded files.
-routes/uploadRoutes.js: Upload Routes
+2. Create directory structure:
+uploads/: Store uploaded files.   
+routes/uploadRoutes.js: Upload Routes.
 
-3. Storage Configuration
+3. Storage Configuration:
 Multer defines how files are saved using diskStorage.
 
 4. Define uploadRoutes
