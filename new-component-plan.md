@@ -9,7 +9,7 @@ npm install express multer path fs
 
 2. Create directory structure:
 uploads/: Store uploaded files.   
-routes/uploadRoutes.js: Upload Routes.
+routes/uploadRoutes.ts: Upload Routes.
 
 3. Storage Configuration:
 Multer defines how files are saved using diskStorage.
