@@ -11,7 +11,6 @@ npm install --save-dev @types/multer
 2. Create directory structure:  
 uploads/: Store uploaded files.   
 middlewares/upload.ts: Config Multer
-routes/uploadRoutes.ts: Upload Routes.  
 
 3. Storage Configuration:  
 Multer defines how files are saved using diskStorage.
@@ -20,4 +19,4 @@ Multer defines how files are saved using diskStorage.
 
 5. Apply upload in productRoutes.
 
-6. Test by using Postman.
+6. Test by using Postman and supertest.

@@ -8,7 +8,7 @@ const app: Express = express();
 app.use(express.json());
 
 // Allow the front-end to access static uploaded files
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "./uploads")));
 
 app.use("/api/v1/products", productRoutes);
 
