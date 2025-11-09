@@ -40,7 +40,7 @@ export const getProductById = (req: Request, res: Response): void => {
 
 export const createProduct = (req: Request, res: Response): void => {
     try {
-        const { name, description, category, stock, price, images, isActive } = req.body;
+        const { name, description, category, stock, price, isActive } = req.body;
 
         if (!name || price === undefined || stock === undefined) {
             res
@@ -49,14 +49,18 @@ export const createProduct = (req: Request, res: Response): void => {
             return;
         }
 
+        // Get image path array from Multer
+        const imageFiles = req.files as Express.Multer.File[];
+        const imagePaths = imageFiles ? imageFiles.map(file => `/uploads/${file.filename}`) : [];
+
         const newProduct = productService.createProduct({
             name,
             description,
             category,
-            stock,
-            price,
-            images,
-            isActive,
+            stock: Number(stock),
+            price: Number(price),
+            images: imagePaths,
+            isActive: isActive === "true" || isActive === true,
         });
 
         res
