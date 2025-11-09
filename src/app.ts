@@ -1,12 +1,12 @@
 import express, { Request, Response, Express } from "express";
+import productRoutes from "./api/v1/routes/productRoutes";
 
 // Initialize Express application
 const app: Express = express();
 
-// Define a route
-app.get("/", (req: Request, res: Response) => {
-    res.send("Hello, World!");
-});
+app.use(express.json());
+
+app.use("/api/v1/products", productRoutes);
 
 // Health check
 app.get("/api/v1/health", (req: Request, res: Response) => {
