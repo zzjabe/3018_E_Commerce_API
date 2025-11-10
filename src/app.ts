@@ -1,6 +1,7 @@
 import express, { Request, Response, Express } from "express";
 import productRoutes from "./api/v1/routes/productRoutes";
 import path from "path";
+import setupSwagger from "./config/swagger";
 
 // Initialize Express application
 const app: Express = express();
@@ -21,5 +22,7 @@ app.get("/api/v1/health", (req: Request, res: Response) => {
         version: "1.0.0",
     });
 });
+
+setupSwagger(app);
 
 export default app;
