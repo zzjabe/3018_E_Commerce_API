@@ -1,4 +1,9 @@
 import express, { Request, Response, Express } from "express";
+import dotenv from "dotenv";
+
+// Load environment variables BEFORE your internal imports!
+dotenv.config();
+
 import productRoutes from "./api/v1/routes/productRoutes";
 import path from "path";
 import setupSwagger from "./config/swagger";
