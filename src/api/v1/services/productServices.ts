@@ -1,47 +1,60 @@
-import { Product } from '../models/productModel';
+import { Product } from "../models/productModel";
+import {
+    createDocument,
+    getDocuments,
+    getDocumentById,
+    updateDocument,
+    deleteDocument
+} from "../repositories/firestoreRepository";
 
-const products: Product[] = [];
+import { Timestamp } from "firebase-admin/firestore";
 
-export const getAllProducts = (): Product[] => {
-    return products;
+const COLLECTION = "products";
+
+export const getAllProducts = async (): Promise<Product[]> => {
+    const snapshot = await getDocuments(COLLECTION);
+
+    return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    })) as Product[];
 };
 
-export const getProductById = (id: string): Product | null =>{
-    const product = products.find(e => e.id === id);
-    if (!product) {
-        return null;
-    }
-    return product;
+export const getProductById = async (id: string): Promise<Product | null> => {
+    const doc = await getDocumentById(COLLECTION, id);
+    if (!doc) return null;
+
+    return {
+        id: doc.id,
+        ...doc.data()
+    } as Product;
 };
 
-export const createProduct = (data: Omit<Product, "id">): Product => {
-    const newProduct: Product = {
-        id: Date.now().toString(),
+export const createProduct = async (
+    data: Omit<Product, "id">
+): Promise<string> => {
+    const newData = {
         ...data,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
     };
-    products.push(newProduct);
 
-    return newProduct;
+    const newId = await createDocument(COLLECTION, newData);
+    return newId;
 };
 
-export const updateProduct = (
+export const updateProduct = async (
     id: string,
     patch: Partial<Product>
-): Product | null =>{
-    const idx = products.findIndex(b => b.id === id);
-    if (idx === -1) return null;
-    products[idx] = { 
-        ...products[idx], 
+): Promise<void> => {
+    const updatedData = {
         ...patch,
-        updatedAt: new Date()
+        updatedAt: Timestamp.now(),
     };
-    return products[idx];
-}
 
-export const deleteProduct = (id: string): Product | null => {
-    const idx = products.findIndex(b => b.id === id);
-    if (idx === -1) return null;
-    return products.splice(idx, 1)[0];
-}
+    await updateDocument(COLLECTION, id, updatedData);
+};
+
+export const deleteProduct = async (id: string): Promise<void> => {
+    await deleteDocument(COLLECTION, id);
+};
