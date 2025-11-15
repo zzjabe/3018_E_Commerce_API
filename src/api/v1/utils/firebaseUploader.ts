@@ -1,4 +1,4 @@
-import { bucket } from "../config/firebaseConfig";
+import { bucket } from "../../../config/firebaseConfig";
 import { v4 as uuidv4 } from "uuid";
 import * as path from "path";
 

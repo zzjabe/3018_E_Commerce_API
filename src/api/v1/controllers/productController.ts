@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import * as productService from "../services/productServices";
 import { HTTP_STATUS } from "../../../constants/httpConstants";
 import { successResponse, errorResponse } from "../models/responseModel";
-import { uploadFilesToFirebase } from "../../../utils/firebaseUploader";
 
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
     try {
@@ -44,10 +43,7 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
             return;
         }
 
-        const files = req.files as Express.Multer.File[];
-        const imageUrls = files?.length
-            ? await uploadFilesToFirebase(files)
-            : [];
+        const files = req.files as Express.Multer.File[] | undefined;
 
         const newId = await productService.createProduct({
             name,
@@ -55,9 +51,9 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
             category,
             stock: Number(stock),
             price: Number(price),
-            images: imageUrls,
+            images: [],
             isActive: isActive === "true" || isActive === true
-        });
+        }, files);
 
         res.status(HTTP_STATUS.CREATED)
            .json(successResponse({ id: newId }, "Product created successfully"));
@@ -71,16 +67,9 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 export const updateProduct = async (req: Request, res: Response): Promise<void> => {
     try {
         const { id } = req.params;
+        const files = req.files as Express.Multer.File[] | undefined;
 
-        let updatedFields = req.body;
-
-        const files = req.files as Express.Multer.File[];
-        if (files && files.length > 0) {
-            const newImageUrls = await uploadFilesToFirebase(files);
-            updatedFields.images = newImageUrls;
-        }
-
-        await productService.updateProduct(id, updatedFields);
+        await productService.updateProduct(id, req.body, files);
 
         res.status(HTTP_STATUS.OK)
            .json(successResponse(null, "Product updated successfully"));

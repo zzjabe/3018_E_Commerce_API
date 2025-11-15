@@ -8,6 +8,7 @@ import {
 } from "../repositories/firestoreRepository";
 
 import { Timestamp } from "firebase-admin/firestore";
+import { uploadFilesToFirebase } from "../utils/firebaseUploader";
 
 const COLLECTION = "products";
 
@@ -31,10 +32,19 @@ export const getProductById = async (id: string): Promise<Product | null> => {
 };
 
 export const createProduct = async (
-    data: Omit<Product, "id">
+    data: Omit<Product, "id">,
+    files?: Express.Multer.File[]
 ): Promise<string> => {
+
+    let imageUrls: string[] = [];
+
+    if (files && files.length > 0) {
+        imageUrls = await uploadFilesToFirebase(files);
+    }
+
     const newData = {
         ...data,
+        images: imageUrls,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
     };
@@ -45,10 +55,19 @@ export const createProduct = async (
 
 export const updateProduct = async (
     id: string,
-    patch: Partial<Product>
+    patch: Partial<Product>,
+    files?: Express.Multer.File[]
 ): Promise<void> => {
-    const updatedData = {
+
+    let imageUrls: string[] | undefined;
+
+    if (files && files.length > 0) {
+        imageUrls = await uploadFilesToFirebase(files);
+    }
+
+    const updatedData: Partial<Product> = {
         ...patch,
+        ...(imageUrls ? { images: imageUrls } : {}),
         updatedAt: Timestamp.now(),
     };
 

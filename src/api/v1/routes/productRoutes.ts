@@ -252,7 +252,7 @@ router.get("/:id", productController.getProductById);
  *         description: Internal server error
  */
 
-router.put("/:id", productController.updateProduct);
+router.put("/:id", upload.array("images", 5), productController.updateProduct);
 
 /**
  * @openapi
