@@ -11,8 +11,8 @@ import {
 } from "./api/v1/middleware/logger";
 
 import productRoutes from "./api/v1/routes/productRoutes";
-import path from "path";
 import setupSwagger from "./config/swagger";
+import errorHandler from "./api/v1/middleware/errorHandler";
 
 // Initialize Express application
 const app: Express = express();
@@ -25,12 +25,9 @@ if (process.env.NODE_ENV === "production") {
 } else {
     // In development, log to console for immediate feedback
     app.use(consoleLogger);
-}
+};
 
 app.use(express.json());
-
-// Allow the front-end to access static uploaded files
-app.use("/uploads", express.static(path.join(__dirname, "./uploads")));
 
 app.use("/api/v1/products", productRoutes);
 
@@ -45,5 +42,8 @@ app.get("/api/v1/health", (req: Request, res: Response) => {
 });
 
 setupSwagger(app);
+
+// Global error handling middleware (MUST be applied last)
+app.use(errorHandler);
 
 export default app;

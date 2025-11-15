@@ -3,19 +3,16 @@ import { v4 as uuidv4 } from "uuid";
 import * as path from "path";
 
 /**
- * Upload multiple files to Firebase Storage and return their download URLs.
- * @param files Express.Multer.File[]
- * @returns Promise<string[]> - List of download URLs
+ * Upload multiple files to Firebase Storage and return their public URLs
  */
 export const uploadFilesToFirebase = async (
     files: Express.Multer.File[]
 ): Promise<string[]> => {
-
     const uploadedUrls: string[] = [];
 
     for (const file of files) {
-        const fileExt = path.extname(file.originalname);
-        const fileName = `${uuidv4()}${fileExt}`;
+        const ext = path.extname(file.originalname);
+        const fileName = `${uuidv4()}${ext}`;
 
         const fileUpload = bucket.file(`products/${fileName}`);
 

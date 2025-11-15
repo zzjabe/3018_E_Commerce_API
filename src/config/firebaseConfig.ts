@@ -14,7 +14,7 @@ import {
     ServiceAccount,
 } from "firebase-admin/app";
 
-import { getFirestore, Firestore } from "firebase-admin/firestore";
+import { getFirestore, Firestore, FirestoreSettings  } from "firebase-admin/firestore";
 import { getAuth, Auth } from "firebase-admin/auth";
 import { getStorage, Storage } from "firebase-admin/storage";
 
@@ -73,6 +73,8 @@ const app: App = initializeFirebaseAdmin();
 
 // Services
 const db: Firestore = getFirestore(app);
+db.settings({ ignoreUndefinedProperties: true } as FirestoreSettings);
+
 const auth: Auth = getAuth(app);
 
 const storage: Storage = getStorage(app);

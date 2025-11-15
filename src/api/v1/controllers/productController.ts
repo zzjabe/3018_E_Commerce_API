@@ -18,13 +18,11 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
     try {
         const { id } = req.params;
         const product = await productService.getProductById(id);
-
         if (!product) {
             res.status(HTTP_STATUS.NOT_FOUND)
                .json(errorResponse("Product not found", "PRODUCT_NOT_FOUND"));
             return;
         }
-
         res.status(HTTP_STATUS.OK)
            .json(successResponse(product, "Product retrieved successfully"));
     } catch (err) {
@@ -45,19 +43,20 @@ export const createProduct = async (req: Request, res: Response): Promise<void> 
 
         const files = req.files as Express.Multer.File[] | undefined;
 
-        const newId = await productService.createProduct({
-            name,
-            description,
-            category,
-            stock: Number(stock),
-            price: Number(price),
-            images: [],
-            isActive: isActive === "true" || isActive === true
-        }, files);
+        const newId = await productService.createProduct(
+            {
+                name,
+                description,
+                category,
+                stock: Number(stock),
+                price: Number(price),
+                images: files ? await (await import("../utils/firebaseUploader")).uploadFilesToFirebase(files) : [],
+                isActive: isActive === "true" || isActive === true,
+            }
+        );
 
         res.status(HTTP_STATUS.CREATED)
            .json(successResponse({ id: newId }, "Product created successfully"));
-        
     } catch (err) {
         res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
            .json(errorResponse("Failed to create product", "PRODUCT_CREATE_ERROR"));
@@ -72,8 +71,7 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
         await productService.updateProduct(id, req.body, files);
 
         res.status(HTTP_STATUS.OK)
-           .json(successResponse(null, "Product updated successfully"));
-        
+           .json(successResponse({ id }, "Product updated successfully"));
     } catch (err) {
         res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
            .json(errorResponse("Failed to update product", "PRODUCT_UPDATE_ERROR"));
@@ -84,9 +82,8 @@ export const deleteProduct = async (req: Request, res: Response): Promise<void> 
     try {
         const { id } = req.params;
         await productService.deleteProduct(id);
-
         res.status(HTTP_STATUS.OK)
-           .json(successResponse(null, "Product deleted successfully"));
+           .json(successResponse({ id }, "Product deleted successfully"));
     } catch (err) {
         res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
            .json(errorResponse("Failed to delete product", "PRODUCT_DELETE_ERROR"));
