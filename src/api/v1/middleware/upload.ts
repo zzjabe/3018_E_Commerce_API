@@ -1,29 +1,15 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
 
-// Set image save path
-const uploadDir = path.join(__dirname, "../../../uploads");
-
-// If the uploads folder does not exist, create it.
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-}
-
-// Configure Multer storage method
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, uploadDir);
-    },
-    filename: function (req, file, cb) {
-        // Ensure filenames are unique
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    },
-});
+// Multer memory storage (store files in memory as buffer)
+const storage = multer.memoryStorage();
 
 // Filter uploading image type
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (
+    req: Express.Request,
+    file: Express.Multer.File,
+    cb: multer.FileFilterCallback
+) => {
     const allowedTypes = /jpeg|jpg|png|gif/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = allowedTypes.test(file.mimetype);
@@ -37,8 +23,8 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
 
 // Upload file size limit: 2MB
 const upload = multer({
-    storage,
-    limits: { fileSize: 2 * 1024 * 1024 },
+    storage,                             // Use memory storage
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
     fileFilter,
 });
 

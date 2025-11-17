@@ -1,47 +1,87 @@
-import { Product } from '../models/productModel';
+import { Product } from "../models/productModel";
+import {
+    createDocument,
+    getDocuments,
+    getDocumentById,
+    updateDocument,
+    deleteDocument,
+} from "../repositories/firestoreRepository";
+import { Timestamp } from "firebase-admin/firestore";
+import { uploadFilesToFirebase } from "../utils/firebaseUploader";
 
-const products: Product[] = [];
+const COLLECTION = "products";
 
-export const getAllProducts = (): Product[] => {
-    return products;
+export const getAllProducts = async (): Promise<Product[]> => {
+    const snapshot = await getDocuments(COLLECTION);
+    return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    })) as Product[];
 };
 
-export const getProductById = (id: string): Product | null =>{
-    const product = products.find(e => e.id === id);
-    if (!product) {
-        return null;
-    }
-    return product;
+export const getProductById = async (id: string): Promise<Product | null> => {
+    const doc = await getDocumentById(COLLECTION, id);
+    if (!doc) return null;
+    return { id: doc.id, ...doc.data() } as Product;
 };
 
-export const createProduct = (data: Omit<Product, "id">): Product => {
-    const newProduct: Product = {
-        id: Date.now().toString(),
+export const createProduct = async (
+    data: Partial<Product>,
+    files?: Express.Multer.File[]
+): Promise<string> => {
+    const productData: Partial<Product> = {
         ...data,
-        createdAt: new Date(),
-        updatedAt: new Date()
+        stock: Number(data.stock),
+        price: Number(data.price),
+        images: [],
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
     };
-    products.push(newProduct);
 
-    return newProduct;
+    if (data.isActive !== undefined) {
+        if (typeof data.isActive === "string") {
+            productData.isActive = data.isActive === "true";
+        } else {
+            productData.isActive = !!data.isActive;
+        }
+    } else {
+        productData.isActive = false;
+    }
+
+    if (files && files.length > 0) {
+        productData.images = await uploadFilesToFirebase(files);
+    }
+
+    return await createDocument(COLLECTION, productData);
 };
 
-export const updateProduct = (
+export const updateProduct = async (
     id: string,
-    patch: Partial<Product>
-): Product | null =>{
-    const idx = products.findIndex(b => b.id === id);
-    if (idx === -1) return null;
-    products[idx] = { 
-        ...products[idx], 
-        ...patch,
-        updatedAt: new Date()
-    };
-    return products[idx];
-}
+    patch: Partial<Product>,
+    files?: Express.Multer.File[]
+): Promise<void> => {
+    const updatedData: Partial<Product> = { ...patch };
 
-export const deleteProduct = (id: string): Product | null => {
-    const idx = products.findIndex(b => b.id === id);
-    if (idx === -1) return null;
-    return products.splice(idx, 1)[0];
-}
+    if (updatedData.stock !== undefined) updatedData.stock = Number(updatedData.stock);
+    if (updatedData.price !== undefined) updatedData.price = Number(updatedData.price);
+
+    if (updatedData.isActive !== undefined) {
+        if (typeof updatedData.isActive === "string") {
+            updatedData.isActive = updatedData.isActive === "true";
+        } else {
+            updatedData.isActive = !!updatedData.isActive;
+        }
+    }
+
+    if (files && files.length > 0) {
+        updatedData.images = await uploadFilesToFirebase(files);
+    }
+
+    updatedData.updatedAt = Timestamp.now();
+
+    await updateDocument(COLLECTION, id, updatedData);
+};
+
+export const deleteProduct = async (id: string): Promise<void> => {
+    await deleteDocument(COLLECTION, id);
+};

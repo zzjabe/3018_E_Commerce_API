@@ -1,9 +1,12 @@
 import express from "express";
 import * as productController from "../controllers/productController";
-import upload from "../middleware/upload"
+import upload from "../middleware/upload";
+import { validate } from "../middleware/validateMiddleware";
+import { createProductSchema, updateProductSchema } from "../validatiors/productValidators"
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
 
 const router = express.Router();
-
 
 /**
  * @openapi
@@ -96,7 +99,14 @@ const router = express.Router();
  *       '500':
  *         description: Internal server error
  */
-router.post("/", upload.array("images", 5), productController.createProduct);
+router.post(
+    "/", 
+    authenticate, 
+    isAuthorized({ hasRole: ["manager"] }),
+    upload.array("images", 5), 
+    validate(createProductSchema), 
+    productController.createProduct
+);
 
 /**
  * @openapi
@@ -148,7 +158,11 @@ router.post("/", upload.array("images", 5), productController.createProduct);
  *         description: Internal server error
  */
 
-router.get("/", productController.getAllProducts);
+router.get(
+    "/", 
+    authenticate, 
+    productController.getAllProducts
+);
 
 /**
  * @openapi
@@ -206,7 +220,11 @@ router.get("/", productController.getAllProducts);
  *       '500':
  *         description: Internal server error
  */
-router.get("/:id", productController.getProductById);
+router.get(
+    "/:id", 
+    authenticate, 
+    productController.getProductById
+);
 
 /**
  * @openapi
@@ -251,8 +269,14 @@ router.get("/:id", productController.getProductById);
  *       '500':
  *         description: Internal server error
  */
-
-router.put("/:id", productController.updateProduct);
+router.put(
+    "/:id",
+    authenticate, 
+    isAuthorized({ hasRole: ["manager"] }), 
+    upload.array("images", 5), 
+    validate(updateProductSchema), 
+    productController.updateProduct
+);
 
 /**
  * @openapi
@@ -275,6 +299,11 @@ router.put("/:id", productController.updateProduct);
  *       '500':
  *         description: Internal server error
  */
-router.delete("/:id", productController.deleteProduct);
+router.delete(
+    "/:id", 
+    authenticate, 
+    isAuthorized({ hasRole: ["manager"] }), 
+    productController.deleteProduct
+);
 
 export default router;
