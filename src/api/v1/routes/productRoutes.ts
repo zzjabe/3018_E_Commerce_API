@@ -1,9 +1,10 @@
 import express from "express";
 import * as productController from "../controllers/productController";
-import upload from "../middleware/upload"
+import upload from "../middleware/upload";
+import { validate } from "../middleware/validateMiddleware";
+import { createProductSchema, updateProductSchema } from "../validatiors/productValidators"
 
 const router = express.Router();
-
 
 /**
  * @openapi
@@ -96,7 +97,12 @@ const router = express.Router();
  *       '500':
  *         description: Internal server error
  */
-router.post("/", upload.array("images", 5), productController.createProduct);
+router.post(
+    "/", 
+    upload.array("images", 5), 
+    validate(createProductSchema), 
+    productController.createProduct
+);
 
 /**
  * @openapi
@@ -251,8 +257,12 @@ router.get("/:id", productController.getProductById);
  *       '500':
  *         description: Internal server error
  */
-
-router.put("/:id", upload.array("images", 5), productController.updateProduct);
+router.put(
+    "/:id", 
+    upload.array("images", 5), 
+    validate(updateProductSchema), 
+    productController.updateProduct
+);
 
 /**
  * @openapi

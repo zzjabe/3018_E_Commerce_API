@@ -3,6 +3,7 @@
     "@redocly/cli": "^2.11.0",
     "@types/express": "^5.0.5",
     "@types/jest": "^30.0.0",
+    "@types/joi": "^17.2.2",
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.9.1",
@@ -28,6 +29,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "firebase-admin": "^13.6.0",
+    "joi": "^18.0.1",
+    "join": "^3.0.0",
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "swagger-ui-express": "^5.0.1"

@@ -1,20 +1,27 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import * as productService from "../services/productServices";
 import { HTTP_STATUS } from "../../../constants/httpConstants";
 import { successResponse, errorResponse } from "../models/responseModel";
 
-export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
+export const getAllProducts = async (
+    req: Request, 
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
         const products = await productService.getAllProducts();
         res.status(HTTP_STATUS.OK)
            .json(successResponse(products, "Fetched all products successfully"));
     } catch (err) {
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-           .json(errorResponse("Failed to retrieve products", "PRODUCT_FETCH_ERROR"));
+        next(err);
     }
 };
 
-export const getProductById = async (req: Request, res: Response): Promise<void> => {
+export const getProductById = async (
+    req: Request, 
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
         const { id } = req.params;
         const product = await productService.getProductById(id);
@@ -26,66 +33,55 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
         res.status(HTTP_STATUS.OK)
            .json(successResponse(product, "Product retrieved successfully"));
     } catch (err) {
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-           .json(errorResponse("Failed to retrieve product", "PRODUCT_FETCH_ERROR"));
+        next(err);
     }
 };
 
-export const createProduct = async (req: Request, res: Response): Promise<void> => {
+export const createProduct = async (
+    req: Request, 
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
-        const { name, description, category, stock, price, isActive } = req.body;
-
-        if (!name || stock === undefined || price === undefined) {
-            res.status(HTTP_STATUS.BAD_REQUEST)
-               .json(errorResponse("Missing required fields", "VALIDATION_ERROR"));
-            return;
-        }
-
         const files = req.files as Express.Multer.File[] | undefined;
-
-        const newId = await productService.createProduct(
-            {
-                name,
-                description,
-                category,
-                stock: Number(stock),
-                price: Number(price),
-                images: files ? await (await import("../utils/firebaseUploader")).uploadFilesToFirebase(files) : [],
-                isActive: isActive === "true" || isActive === true,
-            }
-        );
+        const newId = await productService.createProduct(req.body, files);
 
         res.status(HTTP_STATUS.CREATED)
            .json(successResponse({ id: newId }, "Product created successfully"));
     } catch (err) {
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-           .json(errorResponse("Failed to create product", "PRODUCT_CREATE_ERROR"));
+        next(err);
     }
 };
 
-export const updateProduct = async (req: Request, res: Response): Promise<void> => {
+export const updateProduct = async (
+    req: Request, 
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
         const { id } = req.params;
         const files = req.files as Express.Multer.File[] | undefined;
 
-        await productService.updateProduct(id, req.body, files);
+        await productService.updateProduct(req.params.id, req.body, files);
 
         res.status(HTTP_STATUS.OK)
            .json(successResponse({ id }, "Product updated successfully"));
     } catch (err) {
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-           .json(errorResponse("Failed to update product", "PRODUCT_UPDATE_ERROR"));
+        next(err);
     }
 };
 
-export const deleteProduct = async (req: Request, res: Response): Promise<void> => {
+export const deleteProduct = async (
+    req: Request, 
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
         const { id } = req.params;
         await productService.deleteProduct(id);
         res.status(HTTP_STATUS.OK)
            .json(successResponse({ id }, "Product deleted successfully"));
     } catch (err) {
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-           .json(errorResponse("Failed to delete product", "PRODUCT_DELETE_ERROR"));
+        next(err);
     }
 };

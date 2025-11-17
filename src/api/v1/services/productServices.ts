@@ -7,6 +7,7 @@ import {
     deleteDocument,
 } from "../repositories/firestoreRepository";
 import { Timestamp } from "firebase-admin/firestore";
+import { uploadFilesToFirebase } from "../utils/firebaseUploader";
 
 const COLLECTION = "products";
 
@@ -25,16 +26,33 @@ export const getProductById = async (id: string): Promise<Product | null> => {
 };
 
 export const createProduct = async (
-    data: Omit<Product, "id"> & { images?: string[] }
+    data: Partial<Product>,
+    files?: Express.Multer.File[]
 ): Promise<string> => {
-    const newData = {
+    const productData: Partial<Product> = {
         ...data,
-        images: data.images || [],
+        stock: Number(data.stock),
+        price: Number(data.price),
+        images: [],
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
     };
-    const newId = await createDocument(COLLECTION, newData);
-    return newId;
+
+    if (data.isActive !== undefined) {
+        if (typeof data.isActive === "string") {
+            productData.isActive = data.isActive === "true";
+        } else {
+            productData.isActive = !!data.isActive;
+        }
+    } else {
+        productData.isActive = false;
+    }
+
+    if (files && files.length > 0) {
+        productData.images = await uploadFilesToFirebase(files);
+    }
+
+    return await createDocument(COLLECTION, productData);
 };
 
 export const updateProduct = async (
@@ -42,17 +60,24 @@ export const updateProduct = async (
     patch: Partial<Product>,
     files?: Express.Multer.File[]
 ): Promise<void> => {
-    let imageUrls: string[] | undefined = undefined;
-    if (files && files.length > 0) {
-        const { uploadFilesToFirebase } = await import("../utils/firebaseUploader");
-        imageUrls = await uploadFilesToFirebase(files);
+    const updatedData: Partial<Product> = { ...patch };
+
+    if (updatedData.stock !== undefined) updatedData.stock = Number(updatedData.stock);
+    if (updatedData.price !== undefined) updatedData.price = Number(updatedData.price);
+
+    if (updatedData.isActive !== undefined) {
+        if (typeof updatedData.isActive === "string") {
+            updatedData.isActive = updatedData.isActive === "true";
+        } else {
+            updatedData.isActive = !!updatedData.isActive;
+        }
     }
 
-    const updatedData: Partial<Product> = {
-        ...patch,
-        ...(imageUrls ? { images: imageUrls } : {}),
-        updatedAt: Timestamp.now(),
-    };
+    if (files && files.length > 0) {
+        updatedData.images = await uploadFilesToFirebase(files);
+    }
+
+    updatedData.updatedAt = Timestamp.now();
 
     await updateDocument(COLLECTION, id, updatedData);
 };
