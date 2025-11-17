@@ -3,6 +3,8 @@ import * as productController from "../controllers/productController";
 import upload from "../middleware/upload";
 import { validate } from "../middleware/validateMiddleware";
 import { createProductSchema, updateProductSchema } from "../validatiors/productValidators"
+import authenticate from "../middleware/authenticate";
+import isAuthorized from "../middleware/authorize";
 
 const router = express.Router();
 
@@ -99,6 +101,8 @@ const router = express.Router();
  */
 router.post(
     "/", 
+    authenticate, 
+    isAuthorized({ hasRole: ["manager"] }),
     upload.array("images", 5), 
     validate(createProductSchema), 
     productController.createProduct
@@ -154,7 +158,11 @@ router.post(
  *         description: Internal server error
  */
 
-router.get("/", productController.getAllProducts);
+router.get(
+    "/", 
+    authenticate, 
+    productController.getAllProducts
+);
 
 /**
  * @openapi
@@ -212,7 +220,11 @@ router.get("/", productController.getAllProducts);
  *       '500':
  *         description: Internal server error
  */
-router.get("/:id", productController.getProductById);
+router.get(
+    "/:id", 
+    authenticate, 
+    productController.getProductById
+);
 
 /**
  * @openapi
@@ -258,7 +270,9 @@ router.get("/:id", productController.getProductById);
  *         description: Internal server error
  */
 router.put(
-    "/:id", 
+    "/:id",
+    authenticate, 
+    isAuthorized({ hasRole: ["manager"] }), 
     upload.array("images", 5), 
     validate(updateProductSchema), 
     productController.updateProduct
@@ -285,6 +299,11 @@ router.put(
  *       '500':
  *         description: Internal server error
  */
-router.delete("/:id", productController.deleteProduct);
+router.delete(
+    "/:id", 
+    authenticate, 
+    isAuthorized({ hasRole: ["manager"] }), 
+    productController.deleteProduct
+);
 
 export default router;

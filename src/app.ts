@@ -13,6 +13,7 @@ import {
 import productRoutes from "./api/v1/routes/productRoutes";
 import setupSwagger from "./config/swagger";
 import errorHandler from "./api/v1/middleware/errorHandler";
+import adminRoutes from "./api/v1/routes/adminRoutes"
 
 // Initialize Express application
 const app: Express = express();
@@ -28,6 +29,8 @@ if (process.env.NODE_ENV === "production") {
 };
 
 app.use(express.json());
+
+app.use("/api/v1/admin", adminRoutes);
 
 app.use("/api/v1/products", productRoutes);
 
