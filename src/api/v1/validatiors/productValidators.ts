@@ -1,5 +1,4 @@
 import Joi from "joi";
-import { Product } from "../models/productModel";
 
 export const createProductSchema = Joi.object({
     name: Joi.string().min(3).max(100).required(),

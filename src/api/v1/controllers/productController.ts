@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import * as productService from "../services/productServices";
 import { HTTP_STATUS } from "../../../constants/httpConstants";
 import { successResponse, errorResponse } from "../models/responseModel";
+import { fileTypeFromBuffer } from "file-type";
 
 export const getAllProducts = async (
     req: Request, 
@@ -41,9 +42,22 @@ export const createProduct = async (
     req: Request, 
     res: Response,
     next: NextFunction
-): Promise<void> => {
+): Promise<void>=> {
     try {
         const files = req.files as Express.Multer.File[] | undefined;
+
+        if (files && files.length > 0) { 
+            for (const file of files) { 
+                if (!file.buffer) { 
+                    throw new Error(`File ${file.originalname} has no buffer. Upload failed.`);
+                }
+                const type = await fileTypeFromBuffer(file.buffer);
+                if (!type || !["image/jpeg", "image/png", "image/gif"].includes(type.mime)) {
+                    throw new Error(`Invalid image file: ${file.originalname}`);
+                }
+            }
+        } 
+                                
         const newId = await productService.createProduct(req.body, files);
 
         res.status(HTTP_STATUS.CREATED)

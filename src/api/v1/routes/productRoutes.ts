@@ -103,7 +103,7 @@ router.post(
     "/", 
     authenticate, 
     isAuthorized({ hasRole: ["manager"] }),
-    upload.array("images", 5), 
+    upload.array("images", 2), 
     validate(createProductSchema), 
     productController.createProduct
 );
@@ -273,7 +273,7 @@ router.put(
     "/:id",
     authenticate, 
     isAuthorized({ hasRole: ["manager"] }), 
-    upload.array("images", 5), 
+    upload.array("images", 2), 
     validate(updateProductSchema), 
     productController.updateProduct
 );
