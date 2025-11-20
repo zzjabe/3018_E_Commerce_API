@@ -76,6 +76,18 @@ export const updateProduct = async (
         const { id } = req.params;
         const files = req.files as Express.Multer.File[] | undefined;
 
+        if (files && files.length > 0) { 
+            for (const file of files) { 
+                if (!file.buffer) { 
+                    throw new Error(`File ${file.originalname} has no buffer. Upload failed.`);
+                }
+                const type = await fileTypeFromBuffer(file.buffer);
+                if (!type || !["image/jpeg", "image/png", "image/gif"].includes(type.mime)) {
+                    throw new Error(`Invalid image file: ${file.originalname}`);
+                }
+            }
+        }
+        
         await productService.updateProduct(req.params.id, req.body, files);
 
         res.status(HTTP_STATUS.OK)

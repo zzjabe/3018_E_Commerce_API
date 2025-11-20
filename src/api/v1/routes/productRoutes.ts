@@ -2,7 +2,7 @@ import express from "express";
 import * as productController from "../controllers/productController";
 import upload from "../middleware/upload";
 import { validate } from "../middleware/validateMiddleware";
-import { createProductSchema, updateProductSchema } from "../validatiors/productValidators"
+import { createProductSchema, updateProductSchema } from "../validations/productValidators"
 import authenticate from "../middleware/authenticate";
 import isAuthorized from "../middleware/authorize";
 
@@ -10,7 +10,7 @@ const router = express.Router();
 
 /**
  * @openapi
- * /api/v1/products:
+ * /products:
  *   post:
  *     summary: Create a new product
  *     tags: [Products]
@@ -19,81 +19,18 @@ const router = express.Router();
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             required:
- *               - name
- *               - price
- *               - stock
- *             properties:
- *               name:
- *                 type: string
- *                 example: "Test Product"
- *               description:
- *                 type: string
- *                 example: "A test product"
- *               category:
- *                 type: string
- *                 example: "Electronics"
- *               stock:
- *                 type: integer
- *                 example: 10
- *               price:
- *                 type: number
- *                 example: 100
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
+ *             allOf:
+ *               - $ref: '#/components/schemas/createProductSchema'
+ *               - type: object
+ *                 properties:
+ *                   images:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       format: binary
  *     responses:
  *       '201':
  *         description: Product created successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                       example: "1699999999999"
- *                     name:
- *                       type: string
- *                       example: "Test Product"
- *                     description:
- *                       type: string
- *                       example: "A test product"
- *                     category:
- *                       type: string
- *                       example: "Electronics"
- *                     stock:
- *                       type: integer
- *                       example: 10
- *                     price:
- *                       type: number
- *                       example: 100
- *                     images:
- *                       type: array
- *                       items:
- *                         type: string
- *                         example: "/uploads/test1.jpg"
- *                     isActive:
- *                       type: boolean
- *                       example: true
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *                 message:
- *                   type: string
- *                   example: "Product created successfully"
  *       '400':
  *         description: Invalid input data
  *       '500':
@@ -110,54 +47,16 @@ router.post(
 
 /**
  * @openapi
- * /api/v1/products:
+ * /products:
  *   get:
  *     summary: Get all products
  *     tags: [Products]
  *     responses:
- *       '200':
- *         description: List of products
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                       name:
- *                         type: string
- *                       description:
- *                         type: string
- *                       category:
- *                         type: string
- *                       stock:
- *                         type: integer
- *                       price:
- *                         type: number
- *                       images:
- *                         type: array
- *                         items:
- *                           type: string
- *                       isActive:
- *                         type: boolean
- *                       createdAt:
- *                         type: string
- *                         format: date-time
- *                       updatedAt:
- *                         type: string
- *                         format: date-time
- *       '500':
+ *       200:
+ *         description: Fetched all products successfully
+ *       500:
  *         description: Internal server error
  */
-
 router.get(
     "/", 
     authenticate, 
@@ -166,58 +65,22 @@ router.get(
 
 /**
  * @openapi
- * /api/v1/products/{id}:
+ * /products/{id}:
  *   get:
  *     summary: Get a product by ID
  *     tags: [Products]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
- *           example: "1699999999999"
  *     responses:
- *       '200':
- *         description: Product found
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: success
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     name:
- *                       type: string
- *                     description:
- *                       type: string
- *                     category:
- *                       type: string
- *                     stock:
- *                       type: integer
- *                     price:
- *                       type: number
- *                     images:
- *                       type: array
- *                       items:
- *                         type: string
- *                     isActive:
- *                       type: boolean
- *                     createdAt:
- *                       type: string
- *                       format: date-time
- *                     updatedAt:
- *                       type: string
- *                       format: date-time
- *       '404':
+ *       200:
+ *         description: Product retrieved successfully
+ *       404:
  *         description: Product not found
- *       '500':
+ *       500:
  *         description: Internal server error
  */
 router.get(
@@ -228,7 +91,7 @@ router.get(
 
 /**
  * @openapi
- * /api/v1/products/{id}:
+ * /products/{id}:
  *   put:
  *     summary: Update a product by ID
  *     tags: [Products]
@@ -238,29 +101,20 @@ router.get(
  *         required: true
  *         schema:
  *           type: string
- *           example: "1699999999999"
  *     requestBody:
  *       required: true
  *       content:
  *         multipart/form-data:
  *           schema:
- *             type: object
- *             properties:
- *               name:
- *                 type: string
- *               description:
- *                 type: string
- *               category:
- *                 type: string
- *               stock:
- *                 type: integer
- *               price:
- *                 type: number
- *               images:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
+ *             allOf:
+ *               - $ref: '#/components/schemas/updateProductSchema'
+ *               - type: object
+ *                 properties:
+ *                   images:
+ *                     type: array
+ *                     items:
+ *                       type: string
+ *                       format: binary
  *     responses:
  *       '200':
  *         description: Product updated successfully
@@ -280,23 +134,22 @@ router.put(
 
 /**
  * @openapi
- * /api/v1/products/{id}:
+ * /products/{id}:
  *   delete:
  *     summary: Delete a product by ID
  *     tags: [Products]
  *     parameters:
- *       - name: id
- *         in: path
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
- *           example: "1699999999999"
  *     responses:
- *       '200':
+ *       200:
  *         description: Product deleted successfully
- *       '404':
+ *       404:
  *         description: Product not found
- *       '500':
+ *       500:
  *         description: Internal server error
  */
 router.delete(

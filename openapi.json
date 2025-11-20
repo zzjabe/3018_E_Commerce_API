@@ -18,6 +18,98 @@
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }
+    },
+    "schemas": {
+      "createProductSchema": {
+        "type": "object",
+        "required": [
+          "name",
+          "stock",
+          "price"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100,
+            "description": "Name of the product",
+            "example": "Wireless Bluetooth Headphones"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000,
+            "description": "Detailed description of the product",
+            "example": "High-quality bluetooth headphones with noise cancellation."
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Category this product belongs to",
+            "example": "Electronics"
+          },
+          "stock": {
+            "type": "number",
+            "description": "Available product stock",
+            "example": 50
+          },
+          "price": {
+            "type": "number",
+            "description": "Price of the product",
+            "example": 129.99
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the product is active and visible",
+            "example": true
+          }
+        }
+      },
+      "updateProductSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100,
+            "description": "Updated product name",
+            "example": "Updated Wireless Bluetooth Headphones"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000,
+            "description": "Updated description of the product",
+            "example": "New improved model with longer battery life."
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50,
+            "description": "Updated category of the product",
+            "example": "Audio"
+          },
+          "stock": {
+            "type": "number",
+            "nullable": true,
+            "description": "Updated stock number (if provided)",
+            "example": 80
+          },
+          "price": {
+            "type": "number",
+            "nullable": true,
+            "description": "Updated price (if provided)",
+            "example": 149.99
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the product is active",
+            "example": true
+          }
+        }
+      }
     }
   },
   "security": [
@@ -26,7 +118,7 @@
     }
   ],
   "paths": {
-    "/api/v1/products": {
+    "/products": {
       "post": {
         "summary": "Create a new product",
         "tags": [
@@ -37,113 +129,30 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "price",
-                  "stock"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "example": "Test Product"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/createProductSchema"
                   },
-                  "description": {
-                    "type": "string",
-                    "example": "A test product"
-                  },
-                  "category": {
-                    "type": "string",
-                    "example": "Electronics"
-                  },
-                  "stock": {
-                    "type": "integer",
-                    "example": 10
-                  },
-                  "price": {
-                    "type": "number",
-                    "example": 100
-                  },
-                  "images": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "binary"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "images": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "format": "binary"
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Product created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "success"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string",
-                          "example": "1699999999999"
-                        },
-                        "name": {
-                          "type": "string",
-                          "example": "Test Product"
-                        },
-                        "description": {
-                          "type": "string",
-                          "example": "A test product"
-                        },
-                        "category": {
-                          "type": "string",
-                          "example": "Electronics"
-                        },
-                        "stock": {
-                          "type": "integer",
-                          "example": 10
-                        },
-                        "price": {
-                          "type": "number",
-                          "example": 100
-                        },
-                        "images": {
-                          "type": "array",
-                          "items": {
-                            "type": "string",
-                            "example": "/uploads/test1.jpg"
-                          }
-                        },
-                        "isActive": {
-                          "type": "boolean",
-                          "example": true
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
-                    },
-                    "message": {
-                      "type": "string",
-                      "example": "Product created successfully"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Product created successfully"
           },
           "400": {
             "description": "Invalid input data"
@@ -160,63 +169,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of products",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "success"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "description": {
-                            "type": "string"
-                          },
-                          "category": {
-                            "type": "string"
-                          },
-                          "stock": {
-                            "type": "integer"
-                          },
-                          "price": {
-                            "type": "number"
-                          },
-                          "images": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "isActive": {
-                            "type": "boolean"
-                          },
-                          "createdAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          },
-                          "updatedAt": {
-                            "type": "string",
-                            "format": "date-time"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Fetched all products successfully"
           },
           "500": {
             "description": "Internal server error"
@@ -224,7 +177,7 @@
         }
       }
     },
-    "/api/v1/products/{id}": {
+    "/products/{id}": {
       "get": {
         "summary": "Get a product by ID",
         "tags": [
@@ -232,71 +185,17 @@
         ],
         "parameters": [
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "1699999999999"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Product found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "example": "success"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": "string"
-                        },
-                        "category": {
-                          "type": "string"
-                        },
-                        "stock": {
-                          "type": "integer"
-                        },
-                        "price": {
-                          "type": "number"
-                        },
-                        "images": {
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          }
-                        },
-                        "isActive": {
-                          "type": "boolean"
-                        },
-                        "createdAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        },
-                        "updatedAt": {
-                          "type": "string",
-                          "format": "date-time"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Product retrieved successfully"
           },
           "404": {
             "description": "Product not found"
@@ -317,8 +216,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "1699999999999"
+              "type": "string"
             }
           }
         ],
@@ -327,31 +225,23 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/updateProductSchema"
                   },
-                  "description": {
-                    "type": "string"
-                  },
-                  "category": {
-                    "type": "string"
-                  },
-                  "stock": {
-                    "type": "integer"
-                  },
-                  "price": {
-                    "type": "number"
-                  },
-                  "images": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "binary"
+                  {
+                    "type": "object",
+                    "properties": {
+                      "images": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "format": "binary"
+                        }
+                      }
                     }
                   }
-                }
+                ]
               }
             }
           }
@@ -375,12 +265,11 @@
         ],
         "parameters": [
           {
-            "name": "id",
             "in": "path",
+            "name": "id",
             "required": true,
             "schema": {
-              "type": "string",
-              "example": "1699999999999"
+              "type": "string"
             }
           }
         ],
