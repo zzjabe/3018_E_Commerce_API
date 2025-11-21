@@ -20,7 +20,7 @@
 
 - git clone https://github.com/zzjabe/3018_E_Commerce_API.git  
 
-- cd <your-repo-folder>  
+- cd 3018_E_Commerce_API  
 
 2. Install dependencies
 
@@ -30,13 +30,13 @@
 
 - Example .env file:
 
-- NODE_ENV=development  
-- PORT=3000  
-- FIREBASE_API_KEY=<your_api_key>  
-- FIREBASE_AUTH_DOMAIN=<your_project>.firebaseapp.com  
-- FIREBASE_PROJECT_ID=<your_project_id>  
-- FIREBASE_STORAGE_BUCKET=<your_storage_bucket>  
-- SWAGGER_SERVER_URL=http://localhost:3000/api/v1  
+NODE_ENV=development  
+PORT=3000  
+FIREBASE_API_KEY=<your_api_key>  
+FIREBASE_AUTH_DOMAIN=<your_project>.firebaseapp.com  
+FIREBASE_PROJECT_ID=<your_project_id>  
+FIREBASE_STORAGE_BUCKET=<your_storage_bucket>  
+SWAGGER_SERVER_URL=http://localhost:3000/api/v1  
 
 4. Run the server
 
