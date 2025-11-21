@@ -10,7 +10,7 @@
 
 - Upload product images (up to 2)
 
-- Role-based access (admin, manager)
+- Role-based access (admin, manager, user)
 
 - Firebase Authentication
 
@@ -62,11 +62,11 @@ SWAGGER_SERVER_URL=http://localhost:3000/api/v1
 
 1. Set Custom Claims (Admin)
 
-- POST /api/v1/admin/setCustomClaims
+- POST /admin/setCustomClaims
 
 2. Create Product (Manager)
 
-- POST /api/v1/products
+- POST /products
 
 3. Get All Products
 
