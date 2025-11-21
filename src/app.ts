@@ -14,9 +14,13 @@ import productRoutes from "./api/v1/routes/productRoutes";
 import setupSwagger from "./config/swagger";
 import errorHandler from "./api/v1/middleware/errorHandler";
 import adminRoutes from "./api/v1/routes/adminRoutes"
+import { getHelmetConfig } from "./config/helmetConfig";
 
 // Initialize Express application
 const app: Express = express();
+
+// Apply basic Helmet security
+app.use(getHelmetConfig());
 
 // Logging middleware (should be applied early in the middleware stack)
 if (process.env.NODE_ENV === "production") {
