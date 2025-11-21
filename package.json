@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@redocly/cli": "^2.11.0",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jest": "^30.0.0",
     "@types/joi": "^17.2.2",
@@ -11,6 +12,7 @@
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "jest": "^30.2.0",
+    "prettier": "^3.6.2",
     "supertest": "^7.1.4",
     "swagger-jsdoc": "^6.2.8",
     "ts-jest": "^29.4.5",
@@ -26,9 +28,12 @@
     "generate-docs": "ts-node scripts/generate-openapi.ts && npx @redocly/cli build-docs openapi.json --output docs/index.html"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "file-type": "^21.1.1",
     "firebase-admin": "^13.6.0",
+    "helmet": "^8.1.0",
     "joi": "^18.0.1",
     "join": "^3.0.0",
     "morgan": "^1.10.1",
